@@ -28,6 +28,7 @@ app.use(cookieParser());
 app.use("/api/v1/user", userRoute);
 
 // registerAPI: http://localhost:8080/api/v1/user/register
+// LoginAPI: http://localhost:8080/api/v1/user/login
 
 app.listen(process.env.PORT, () => {
   console.log(`Server listen at port ${process.env.PORT}`);

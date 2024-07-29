@@ -2,6 +2,8 @@ import { User } from "../models/userSchema.js";
 
 import bcryptjs from "bcryptjs";
 
+import jwt from "jsonwebtoken";
+
 //  user Register
 export const Register = async (req, res) => {
   try {
@@ -38,5 +40,54 @@ export const Register = async (req, res) => {
     });
   } catch (error) {
     console.log("UserConroller Se Error he bhai", error);
+  }
+};
+
+//  user Login
+
+export const Login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(401).json({
+        message: "All field are required",
+        success: false,
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Incorrect email or password",
+        success: false,
+      });
+    }
+
+    const isMatch = await bcryptjs.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Incorect email or password",
+        success: false,
+      });
+    }
+
+    const tokenData = {
+      userId: user._id,
+    };
+
+    const token = await jwt.sign({ tokenData }, process.env.TOKEN_SECRET, {
+      expiresIn: "1d",
+    });
+
+    return res
+      .status(201)
+      .cookie("token", token, { expiresIn: "1d", httpOnly: true })
+      .json({
+        message: `Welcome back ${user.name}`,
+        success: true,
+      });
+  } catch (error) {
+    console.log(error);
   }
 };
