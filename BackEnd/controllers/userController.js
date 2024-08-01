@@ -107,3 +107,32 @@ export const Logout = (req, res) => {
     success: true,
   });
 };
+
+//  user book mark
+
+export const BookMark = async (req, res) => {
+  try {
+    const logingUserId = req.body.id;
+    const tweetId = req.params.id;
+    const user = await User.findById(logingUserId);
+    if (user.bookMarks.includes(tweetId)) {
+      // remove bookMark
+      await User.findByIdAndUpdate(logingUserId, {
+        $pull: { bookMarks: tweetId },
+      });
+      return res.status(200).json({
+        message: "Removed from bookMarks",
+      });
+    } else {
+      // add bookMark
+      await User.findByIdAndUpdate(logingUserId, {
+        $push: { bookMarks: tweetId },
+      });
+      return res.status(200).json({
+        message: "Save to bookMarks",
+      });
+    }
+  } catch (error) {
+    console.log("UserController se BookMark se bhai error he...", error);
+  }
+};

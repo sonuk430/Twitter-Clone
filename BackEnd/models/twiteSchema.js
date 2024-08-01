@@ -14,10 +14,6 @@ const twitSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    bookMarks: {
-      type: [],
-      default: [],
-    },
   },
   { timestamps: true }
 );
