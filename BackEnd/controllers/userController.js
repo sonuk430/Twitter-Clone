@@ -7,10 +7,10 @@ import jwt from "jsonwebtoken";
 //  user Register
 export const Register = async (req, res) => {
   try {
-    const { name, username, email, password } = req.body;
+    const { name, uName, email, password } = req.body;
 
     //  user Validation
-    if (!name || !username || !email || !password) {
+    if (!name || !uName || !email || !password) {
       return res.status(401).json({
         message: "All field are required",
         success: false,
@@ -29,7 +29,7 @@ export const Register = async (req, res) => {
 
     await User.create({
       name,
-      username,
+      uName,
       email,
       password: hashedPassword,
     });
@@ -44,6 +44,10 @@ export const Register = async (req, res) => {
       error
     );
   }
+  return res.status(500).json({
+    message: "Internal server error",
+    success: false,
+  });
 };
 
 //  user Login
@@ -80,7 +84,7 @@ export const Login = async (req, res) => {
       userId: user._id,
     };
 
-    const token = await jwt.sign({ tokenData }, process.env.TOKEN_SECRET, {
+    const token = await jwt.sign(tokenData, process.env.TOKEN_SECRET, {
       expiresIn: "1d",
     });
 
@@ -134,5 +138,88 @@ export const BookMark = async (req, res) => {
     }
   } catch (error) {
     console.log("UserController se BookMark se bhai error he...", error);
+  }
+};
+
+//  user ProfileGetProfile
+
+export const UserProfile = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id).select("-password");
+    return res.status(200).json({
+      user,
+    });
+  } catch (error) {
+    console.log("Usre ProFile se error...", error);
+  }
+};
+
+// get otherUser List
+
+export const GetOtherUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const otherUsers = await User.find({ _id: { $ne: id } }).select(
+      "-password"
+    );
+    if (!otherUsers) {
+      return res.status(401).json({
+        message: "Currently do not have any users.",
+      });
+    }
+    return res.status(200).json({
+      otherUsers,
+    });
+  } catch (error) {
+    console.log("error getOtherUser se he bhai.... ", error);
+  }
+};
+
+// user follow
+export const Follow = async (req, res) => {
+  try {
+    const loggedInUserId = req.body.id;
+    const userId = req.params.id;
+    const loggedInUser = await User.findById(loggedInUserId); //patel
+    const user = await User.findById(userId); //keshav
+    if (!user.followers.includes(loggedInUserId)) {
+      await user.updateOne({ $push: { followers: loggedInUserId } });
+      await loggedInUser.updateOne({ $push: { following: userId } });
+    } else {
+      return res.status(400).json({
+        message: `User already followed to ${user.name}`,
+      });
+    }
+    return res.status(200).json({
+      message: `${loggedInUser.name} just follow to ${user.name}`,
+      success: true,
+    });
+  } catch (error) {
+    console.log("error he bhai follow se .....", error);
+  }
+};
+
+//  user unfollow
+export const Unfollow = async (req, res) => {
+  try {
+    const loggedInUserId = req.body.id;
+    const userId = req.params.id;
+    const loggedInUser = await User.findById(loggedInUserId); //patel
+    const user = await User.findById(userId); //keshav
+    if (loggedInUser.following.includes(userId)) {
+      await user.updateOne({ $pull: { followers: loggedInUserId } });
+      await loggedInUser.updateOne({ $pull: { following: userId } });
+    } else {
+      return res.status(400).json({
+        message: `User has not followed yet`,
+      });
+    }
+    return res.status(200).json({
+      message: `${loggedInUser.name} unfollow to ${user.name}`,
+      success: true,
+    });
+  } catch (error) {
+    console.log("error unfollow se he .....", error);
   }
 };
