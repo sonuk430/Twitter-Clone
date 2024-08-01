@@ -39,7 +39,10 @@ export const Register = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.log("UserConroller Se Error he bhai", error);
+    console.log(
+      "UserConroller Se Error he bhai Register nahi ho pa raha he user",
+      error
+    );
   }
 };
 
@@ -64,6 +67,7 @@ export const Login = async (req, res) => {
       });
     }
 
+    //  bcryptjs is a laybrary its give Compare method,its help to compare exiting password and user login time Puting password
     const isMatch = await bcryptjs.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({
@@ -88,6 +92,18 @@ export const Login = async (req, res) => {
         success: true,
       });
   } catch (error) {
-    console.log(error);
+    console.log(
+      "userController se error he user Login nahi huaa bhai....",
+      error
+    );
   }
+};
+
+//  user LogOut
+
+export const Logout = (req, res) => {
+  return res.cookie("token", "", { expiresIn: new Date(Date.now()) }).json({
+    message: "user logOut successfully.",
+    success: true,
+  });
 };
