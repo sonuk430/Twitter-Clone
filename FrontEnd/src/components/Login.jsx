@@ -1,11 +1,49 @@
 import { useState } from "react";
 
+import axios from "axios";
+import { USER_API_ENDPOINT } from "../utils/constent";
+
 const Login = () => {
   const [isLogin, setLogin] = useState(true);
+  const [name, setName] = useState("");
+  const [username, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   function loginSignupHandler() {
     setLogin(!isLogin);
   }
+
+  //  login form  submitHandler fn
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    if (isLogin) {
+      // Login
+      try {
+        const res = await axios.post(`${USER_API_ENDPOINT}/login`, {
+          email,
+          password,
+        });
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      // singUp
+      try {
+        const res = await axios.post(`${USER_API_ENDPOINT}/register`, {
+          name,
+          username,
+          email,
+          password,
+        });
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
 
   return (
     <>
@@ -27,16 +65,20 @@ const Login = () => {
               {" "}
               {isLogin ? "Login" : "Singup"}
             </h1>
-            <form className="flex flex-col w-[60%]">
+            <form onSubmit={submitHandler} className="flex flex-col w-[60%]">
               {!isLogin && (
                 <>
                   <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     type="text"
                     placeholder="Name"
                     className="outline-blue-500 border border-gray-800 px-3 py-1 font-semibold rounded-full my-1"
                   />
 
                   <input
+                    value={username}
+                    onChange={(e) => setUserName(e.target.value)}
                     type="text"
                     placeholder="UserName"
                     className="outline-blue-500 border border-gray-800 px-3 py-1 rounded-full my-1 font-semibold"
@@ -45,13 +87,17 @@ const Login = () => {
               )}
 
               <input
-                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
                 placeholder="Email"
                 className="outline-blue-500 border border-gray-800 px-3 py-1 rounded-full my-1 font-semibold"
               />
 
               <input
-                type="text"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password"
                 placeholder="Password"
                 className="outline-blue-500 border border-gray-800 px-3 py-1 rounded-full my-1 font-semibold"
               />
