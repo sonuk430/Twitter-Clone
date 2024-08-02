@@ -2,13 +2,20 @@ import { useState } from "react";
 
 import axios from "axios";
 import { USER_API_ENDPOINT } from "../utils/constent";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { getUser } from "../redux/userSlice";
 
 const Login = () => {
   const [isLogin, setLogin] = useState(true);
   const [name, setName] = useState("");
-  const [username, setUserName] = useState("");
+  const [uName, setuName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const dispatch = useDispatch();
 
   function loginSignupHandler() {
     setLogin(!isLogin);
@@ -21,26 +28,55 @@ const Login = () => {
     if (isLogin) {
       // Login
       try {
-        const res = await axios.post(`${USER_API_ENDPOINT}/login`, {
-          email,
-          password,
-        });
-        console.log(res);
+        const res = await axios.post(
+          `${USER_API_ENDPOINT}/login`,
+          {
+            email,
+            password,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+        // console.log(res);
+        dispatch(getUser(res?.data?.user));
+        if (res.data.success) {
+          navigate("/");
+          toast.success(res.data.message);
+        }
       } catch (error) {
         console.log(error);
+        toast.success(error.res.data.message);
       }
     } else {
       // singUp
       try {
-        const res = await axios.post(`${USER_API_ENDPOINT}/register`, {
-          name,
-          username,
-          email,
-          password,
-        });
-        console.log(res);
+        const res = await axios.post(
+          `${USER_API_ENDPOINT}/register`,
+          {
+            name,
+            uName,
+            email,
+            password,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+        // console.log(res);
+        if (res.data.success) {
+          setLogin(true);
+          toast.success(res.data.message);
+        }
       } catch (error) {
         console.log(error);
+        toast.success(error.res.data.message);
       }
     }
   };
@@ -77,8 +113,8 @@ const Login = () => {
                   />
 
                   <input
-                    value={username}
-                    onChange={(e) => setUserName(e.target.value)}
+                    value={uName}
+                    onChange={(e) => setuName(e.target.value)}
                     type="text"
                     placeholder="UserName"
                     className="outline-blue-500 border border-gray-800 px-3 py-1 rounded-full my-1 font-semibold"
